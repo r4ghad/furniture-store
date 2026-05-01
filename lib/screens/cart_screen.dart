@@ -20,7 +20,7 @@ class CartScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Review your selected rental devices',
+            'Review your selected items',
             style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
           ),
           const SizedBox(height: 20),
@@ -154,7 +154,7 @@ class CartScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Rental Total', style: TextStyle(color: Color(0xFFC73659))),
+              const Text('Total', style: TextStyle(color: Color(0xFFC73659))),
               Text(
                 '\$${cartProvider.totalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFC73659)),

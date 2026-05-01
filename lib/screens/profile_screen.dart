@@ -24,12 +24,12 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Gadget User',
+            'furniture User',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
           ),
           const SizedBox(height: 8),
           const Text(
-            'user@gadgetrental.com',
+            'user@furniture.com',
             style: TextStyle(fontSize: 14, color: Color(0xFFC73659)),
           ),
           const SizedBox(height: 32),
@@ -43,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildProfileRow(
                   icon: Icons.favorite,
                   color: const Color(0xFFA91D3A),
-                  title: 'Favorite Devices',
+                  title: 'Favorite Items',
                   value: favoriteProvider.favoriteCount.toString(),
                 ),
                 const Divider(color: Color(0xFFC73659), height: 1),
