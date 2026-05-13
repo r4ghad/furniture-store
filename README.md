@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Assignment 4
+=======
+# assignment_3
+>>>>>>> 564780827e10f1ad21d2186609363de681881413
 
 ##  Based on Assignment 3 (E-Commerce App with Provider)
 
