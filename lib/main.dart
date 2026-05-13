@@ -2,25 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorite_provider.dart';
+import 'providers/product_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/category_screen.dart';
 import 'screens/favorite_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // تحميل المنتجات من Cache
+  final productProvider = ProductProvider();
+  await productProvider.loadProductsFromCache();
+
+  // تحميل المفضلة من الملف
+  final favoriteProvider = FavoriteProvider();
+  await favoriteProvider.loadFavorites();
+
+  await Future.delayed(const Duration(seconds: 1)); // تأخير ثانية
+
+  print(
+    '✅ main.dart: تم تحميل ${favoriteProvider.favoriteCount} منتج في المفضلة',
+  );
+
+  runApp(
+    MyApp(productProvider: productProvider, favoriteProvider: favoriteProvider),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ProductProvider productProvider;
+  final FavoriteProvider favoriteProvider;
+
+  const MyApp({
+    super.key,
+    required this.productProvider,
+    required this.favoriteProvider,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
+        ChangeNotifierProvider(create: (_) => favoriteProvider),
+        ChangeNotifierProvider(create: (_) => productProvider),
       ],
       child: MaterialApp(
         title: 'Furniture E-Commerce',
@@ -59,6 +86,14 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
@@ -78,7 +113,10 @@ class _MainScreenState extends State<MainScreen> {
         unselectedItemColor: const Color(0xFFC73659),
         items: [
           const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          const BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Categories'),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            label: 'Categories',
+          ),
           BottomNavigationBarItem(
             icon: Stack(
               clipBehavior: Clip.none,
@@ -94,7 +132,10 @@ class _MainScreenState extends State<MainScreen> {
                         color: Color(0xFFA91D3A),
                         shape: BoxShape.circle,
                       ),
-                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
                       child: Text(
                         favoriteProvider.favoriteCount.toString(),
                         style: const TextStyle(
@@ -125,7 +166,10 @@ class _MainScreenState extends State<MainScreen> {
                         color: Color(0xFFA91D3A),
                         shape: BoxShape.circle,
                       ),
-                      constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
                       child: Text(
                         cartProvider.totalItems.toString(),
                         style: const TextStyle(
@@ -141,7 +185,10 @@ class _MainScreenState extends State<MainScreen> {
             ),
             label: 'Cart',
           ),
-          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );

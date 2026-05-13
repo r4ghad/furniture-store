@@ -22,7 +22,7 @@ class ProductDetailScreen extends StatelessWidget {
             // Image with Back Button and Favorite Icon
             Stack(
               children: [
-                Image.asset(
+                Image.network(
                   product.imageUrl,
                   height: 350,
                   width: double.infinity,

@@ -1,17 +1,8 @@
-# assignment_4
+# Assignment 4
 
-A new Flutter project.
+##  Based on Assignment 3 (E-Commerce App with Provider)
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+###  New Features Added (Assignment 4)
+- Fetch real products from REST API (Exercise 1)
+- Save favorites permanently using SharedPreferences (Exercise 2)
+- Offline support with local JSON cache (Exercise 3)

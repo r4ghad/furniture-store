@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorite_provider.dart';
+import '../providers/product_provider.dart';
 import '../models/product_model.dart';
 import 'product_detail_screen.dart';
 
@@ -13,72 +14,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late List<Product> _trendingProducts;
-  late List<Product> _mostRequestedProducts;
-
   @override
   void initState() {
     super.initState();
-    _initProducts();
-  }
-
-  void _initProducts() {
-    _trendingProducts = [
-      Product(
-        id: 'P4',
-        name: 'Wool Handmade Rug',
-        category: 'Living Rooms',
-        description: 'Handmade natural wool rug',
-        price: 159.99,
-        oldPrice: 229.99,
-        imageUrl: 'assets/P4.jpeg',
-      ),
-      Product(
-        id: 'P9',
-        name: 'Velvet Ottoman',
-        category: 'Living Rooms',
-        description: 'Stylish velvet ottoman',
-        price: 129.99,
-        oldPrice: 199.99,
-        imageUrl: 'assets/P9.jpeg',
-      ),
-      Product(
-        id: 'P14',
-        name: 'Kitchen Island',
-        category: 'Kitchen',
-        description: 'Kitchen island with storage',
-        price: 299.99,
-        oldPrice: 399.99,
-        imageUrl: 'assets/P14.jpeg',
-      ),
-    ];
-
-    _mostRequestedProducts = [
-      Product(
-        id: 'P1',
-        name: 'Modern Sofa',
-        category: 'Living Rooms',
-        description: 'Luxury velvet sofa',
-        price: 539.99,
-        oldPrice: 899.99,
-        imageUrl: 'assets/P1.jpeg',
-      ),
-      Product(
-        id: 'P2',
-        name: 'Smart Coffee Table',
-        category: 'Living Rooms',
-        description: 'Coffee table with USB',
-        price: 299.99,
-        oldPrice: 499.99,
-        imageUrl: 'assets/P2.jpeg',
-      ),
-    ];
+    // تحميل المنتجات عند فتح الصفحة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final productProvider = Provider.of<ProductProvider>(context);
+
+    final isLoading = productProvider.isLoading;
+    final products = productProvider.products;
+    final isOffline = productProvider.isOffline;
+
+    // تقسيم المنتجات إلى Trending و Most Requested
+    final trendingProducts = products.take(3).toList();
+    final mostRequestedProducts = products.skip(3).take(2).toList();
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -86,81 +43,129 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // TRENDING SECTION
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Trending',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+            // رسالة وضع غير متصل
+            if (isOffline)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFA91D3A).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFA91D3A)),
                 ),
-                TextButton(
-                  onPressed: () {
-                    _showAllProductsDialog(context, 'Trending Products', _trendingProducts);
-                  },
-                  child: const Text(
-                    'See all',
-                    style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+                child: const Row(
+                  children: [
+                    Icon(Icons.wifi_off, size: 16, color: Color(0xFFC73659)),
+                    SizedBox(width: 8),
+                    Text(
+                      'Offline mode - showing cached products',
+                      style: TextStyle(color: Color(0xFFC73659), fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+
+            // شاشة التحميل
+            if (isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(color: Color(0xFFC73659)),
+                      SizedBox(height: 16),
+                      Text('Loading products...', style: TextStyle(color: Color(0xFFEEEEEE))),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Most loved styles right now',
-              style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 320,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _trendingProducts.length,
-                itemBuilder: (ctx, index) {
-                  final product = _trendingProducts[index];
-                  return _buildProductCard(product, favoriteProvider, cartProvider);
-                },
               ),
-            ),
 
-            const SizedBox(height: 32),
-
-            // MOST REQUESTED SECTION
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Most Requested',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+            if (!isLoading && products.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text('No products found', style: TextStyle(color: Color(0xFFC73659))),
                 ),
-                TextButton(
-                  onPressed: () {
-                    _showAllProductsDialog(context, 'Most Requested Products', _mostRequestedProducts);
-                  },
-                  child: const Text(
-                    'See all',
-                    style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+              ),
+
+            if (!isLoading && products.isNotEmpty) ...[
+              // TRENDING SECTION
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Trending',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Our customers favorite picks',
-              style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 320,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _mostRequestedProducts.length,
-                itemBuilder: (ctx, index) {
-                  final product = _mostRequestedProducts[index];
-                  return _buildProductCard(product, favoriteProvider, cartProvider);
-                },
+                  TextButton(
+                    onPressed: () {
+                      _showAllProductsDialog(context, 'Trending Products', trendingProducts);
+                    },
+                    child: const Text(
+                      'See all',
+                      style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+                    ),
+                  ),
+                ],
               ),
-            ),
+              const SizedBox(height: 4),
+              const Text(
+                'Most loved styles right now',
+                style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 320,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: trendingProducts.length,
+                  itemBuilder: (ctx, index) {
+                    final product = trendingProducts[index];
+                    return _buildProductCard(product, favoriteProvider, cartProvider);
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // MOST REQUESTED SECTION
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Most Requested',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _showAllProductsDialog(context, 'Most Requested Products', mostRequestedProducts);
+                    },
+                    child: const Text(
+                      'See all',
+                      style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Our customers favorite picks',
+                style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 320,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: mostRequestedProducts.length,
+                  itemBuilder: (ctx, index) {
+                    final product = mostRequestedProducts[index];
+                    return _buildProductCard(product, favoriteProvider, cartProvider);
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -191,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: Image.asset(
+                  child: Image.network(
                     product.imageUrl,
                     height: 150,
                     width: double.infinity,
@@ -369,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
+              child: Image.network(
                 product.imageUrl,
                 width: 60,
                 height: 60,
