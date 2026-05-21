@@ -1,83 +1,116 @@
-import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/product_model.dart';
+import '../services/favorites_service.dart';
 
 class FavoriteProvider extends ChangeNotifier {
   List<Product> _favorites = [];
-  static const String _favoritesKey = 'favorites_cache_json';
+  bool _isLoading = false;
+  StreamSubscription? _favoritesSubscription;
 
   List<Product> get favorites => _favorites;
   int get favoriteCount => _favorites.length;
+  bool get isLoading => _isLoading;
 
   bool isFavorite(Product product) {
     return _favorites.any((item) => item.id == product.id);
   }
 
-  // ✅ تحميل المفضلة من SharedPreferences عند بدء التطبيق
+  // ✅ الاشتراك في المفضلة من Firestore باستخدام snapshots() (real-time updates)
+  void subscribeToFavorites() {
+    _favoritesSubscription?.cancel();
+    _isLoading = true;
+    notifyListeners();
+
+    // التحقق من تسجيل الدخول
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      _isLoading = false;
+      _favorites = [];
+      notifyListeners();
+      return;
+    }
+
+    _favoritesSubscription = FavoritesService.getFavoritesStream().listen(
+      (favorites) {
+        _favorites = favorites;
+        _isLoading = false;
+        notifyListeners();
+        print('✅ Favorites synced from Firestore: ${favorites.length}');
+      },
+      onError: (e) {
+        print('❌ Firestore favorites error: $e');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  // ✅ إيقاف الاشتراك
+  void unsubscribeFromFavorites() {
+    _favoritesSubscription?.cancel();
+    _favoritesSubscription = null;
+  }
+
+  // ✅ تحميل المفضلة عند بدء التطبيق (اختياري - يمكن استخدام subscribeToFavorites)
   Future<void> loadFavorites() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonString = prefs.getString(_favoritesKey);
-
-      if (jsonString == null || jsonString.isEmpty) {
-        print('📂 لا توجد مفضلة محفوظة — قائمة فارغة');
-        return;
-      }
-
-      final List<dynamic> jsonList = jsonDecode(jsonString);
-
-      // ✅ استخدام fromFavoriteJson لأن المفضلة تحتوي على 4 حقول فقط
-      _favorites = jsonList
-          .map((json) => Product.fromFavoriteJson(json))
-          .toList();
-
+      _isLoading = true;
       notifyListeners();
-      print('✅ تم تحميل ${_favorites.length} منتج من المفضلة المحفوظة');
 
+      final favorites = await FavoritesService.loadFavorites();
+      _favorites = favorites;
+
+      _isLoading = false;
+      notifyListeners();
+      print('✅ Loaded ${_favorites.length} favorites from Firestore');
     } catch (e) {
-      print('❌ خطأ في تحميل المفضلة: $e');
+      print('❌ Error loading favorites: $e');
       _favorites = [];
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
-  // ✅ حفظ المفضلة في SharedPreferences — البيانات الضرورية فقط (4 حقول)
-  Future<void> _saveFavorites() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
+  // ✅ تبديل حالة المفضلة (إضافة/إزالة)
+  // نستخدم عكس المنطق لأن الـ stream يحدث القائمة تلقائياً
+  Future<void> toggleFavorite(Product product) async {
+    // ✅ ننتظر لحظة للتأكد من حالة الـ stream
+    await Future.delayed(const Duration(milliseconds: 100));
 
-      // ✅ حفظ id, name, price, imageUrl فقط
-      final jsonList = _favorites
-          .map((p) => {
-                'id': p.id,
-                'name': p.name,
-                'price': p.price,
-                'imageUrl': p.imageUrl,
-              })
-          .toList();
+    final currentlyFavorite = isFavorite(product);
 
-      final jsonString = jsonEncode(jsonList);
-      await prefs.setString(_favoritesKey, jsonString);
-      print('✅ تم حفظ ${_favorites.length} منتج في المفضلة المحفوظة');
-
-    } catch (e) {
-      print('❌ خطأ في حفظ المفضلة: $e');
-    }
-  }
-
-  void toggleFavorite(Product product) {
-    if (isFavorite(product)) {
-      _favorites.removeWhere((item) => item.id == product.id);
+    if (currentlyFavorite) {
+      // إذا كان في المفضلة: أزله
+      await FavoritesService.removeFavorite(product.id);
     } else {
-      _favorites.add(product);
+      // إذا لم يكن في المفضلة: أضفه
+      await FavoritesService.addFavorite(product);
     }
-    notifyListeners();
-    _saveFavorites();
+    // لا حاجة لـ notifyListeners() لأن Firestore stream سيحدثها تلقائياً
   }
 
-  void removeFromFavorites(String productId) {
-    _favorites.removeWhere((item) => item.id == productId);
-    notifyListeners();
-    _saveFavorites();
+  // ✅ إزالة من المفضلة - الـ stream سيحدث القائمة تلقائياً
+  Future<void> removeFromFavorites(String productId) async {
+    await FavoritesService.removeFavorite(productId);
   }
-}
+
+  // ✅ تحديث بيانات منتج في المفضلة باستخدام update()
+  Future<void> updateFavorite(Product product) async {
+    if (isFavorite(product)) {
+      await FavoritesService.updateFavorite(product);
+      final index = _favorites.indexWhere((item) => item.id == product.id);
+      if (index != -1) {
+        _favorites[index] = product;
+        notifyListeners();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    unsubscribeFromFavorites();
+    super.dispose();
+  }
+}

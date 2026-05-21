@@ -20,7 +20,11 @@ class FavoriteScreen extends StatelessWidget {
         children: [
           const Text(
             'Favorites',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFEEEEEE),
+            ),
           ),
           const SizedBox(height: 4),
           const Text(
@@ -34,26 +38,47 @@ class FavoriteScreen extends StatelessWidget {
                 padding: EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    Icon(Icons.favorite_border, size: 64, color: Color(0xFFC73659)),
+                    Icon(
+                      Icons.favorite_border,
+                      size: 64,
+                      color: Color(0xFFC73659),
+                    ),
                     SizedBox(height: 16),
-                    Text('No favorites yet', style: TextStyle(color: Color(0xFFC73659))),
+                    Text(
+                      'No favorites yet',
+                      style: TextStyle(color: Color(0xFFC73659)),
+                    ),
                   ],
                 ),
               ),
             )
           else
-            ...favoriteProvider.favorites.map((product) => _buildFavoriteCard(product, favoriteProvider, cartProvider, context)),
+            ...favoriteProvider.favorites.map(
+              (product) => _buildFavoriteCard(
+                product,
+                favoriteProvider,
+                cartProvider,
+                context,
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildFavoriteCard(Product product, FavoriteProvider favoriteProvider, CartProvider cartProvider, BuildContext context) {
+  Widget _buildFavoriteCard(
+    Product product,
+    FavoriteProvider favoriteProvider,
+    CartProvider cartProvider,
+    BuildContext context,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
+          ),
         );
       },
       child: Container(
@@ -76,7 +101,11 @@ class FavoriteScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   color: const Color(0xFF1E1E1E),
-                  child: const Icon(Icons.image, size: 40, color: Color(0xFFC73659)),
+                  child: const Icon(
+                    Icons.image,
+                    size: 40,
+                    color: Color(0xFFC73659),
+                  ),
                 ),
               ),
             ),
@@ -85,13 +114,30 @@ class FavoriteScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(product.category, style: const TextStyle(color: Color(0xFFC73659), fontSize: 12)),
+                  Text(
+                    product.category,
+                    style: const TextStyle(
+                      color: Color(0xFFC73659),
+                      fontSize: 12,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     '\$${product.price.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFFEEEEEE)),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                 ],
               ),
@@ -99,15 +145,28 @@ class FavoriteScreen extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFA91D3A)),
-                  onPressed: () => favoriteProvider.removeFromFavorites(product.id),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFA91D3A),
+                  ),
+                  onPressed: () =>
+                      favoriteProvider.removeFromFavorites(product.id),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.add_shopping_cart, color: Color(0xFFC73659)),
+                  icon: const Icon(
+                    Icons.add_shopping_cart,
+                    color: Color(0xFFC73659),
+                  ),
                   onPressed: () {
                     cartProvider.addToCart(product);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Added to cart'), backgroundColor: Color(0xFFA91D3A)),
+                      const SnackBar(
+                        content: Text(
+                          'Added to cart',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: Color(0xFFA91D3A),
+                      ),
                     );
                   },
                 ),

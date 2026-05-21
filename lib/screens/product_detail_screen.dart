@@ -31,14 +31,21 @@ class ProductDetailScreen extends StatelessWidget {
                     height: 350,
                     width: double.infinity,
                     color: const Color(0xFF1E1E1E),
-                    child: const Icon(Icons.image, size: 80, color: Color(0xFFC73659)),
+                    child: const Icon(
+                      Icons.image,
+                      size: 80,
+                      color: Color(0xFFC73659),
+                    ),
                   ),
                 ),
                 Positioned(
                   top: 40,
                   left: 16,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Color(0xFFEEEEEE)),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Color(0xFFEEEEEE),
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -47,8 +54,12 @@ class ProductDetailScreen extends StatelessWidget {
                   right: 16,
                   child: IconButton(
                     icon: Icon(
-                      favoriteProvider.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-                      color: favoriteProvider.isFavorite(product) ? const Color(0xFFA91D3A) : const Color(0xFFEEEEEE),
+                      favoriteProvider.isFavorite(product)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      color: favoriteProvider.isFavorite(product)
+                          ? const Color(0xFFA91D3A)
+                          : const Color(0xFFEEEEEE),
                       size: 28,
                     ),
                     onPressed: () => favoriteProvider.toggleFavorite(product),
@@ -63,7 +74,11 @@ class ProductDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -71,23 +86,37 @@ class ProductDetailScreen extends StatelessWidget {
                     children: [
                       Text(
                         product.category,
-                        style: const TextStyle(fontSize: 16, color: Color(0xFFC73659)),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFFC73659),
+                        ),
                       ),
                       Text(
                         '\$${product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEEEEEE),
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'Description',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     product.description,
-                    style: const TextStyle(fontSize: 16, color: Color(0xFFC73659)),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFFC73659),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   if (product.oldPrice != null)
@@ -95,13 +124,20 @@ class ProductDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         'Was: \$${product.oldPrice!.toStringAsFixed(2)}',
-                        style: const TextStyle(decoration: TextDecoration.lineThrough, color: Color(0xFFC73659)),
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          color: Color(0xFFC73659),
+                        ),
                       ),
                     ),
                   if (product.discountPercent != null)
                     Text(
                       '-${product.discountPercent}% OFF',
-                      style: const TextStyle(color: Color(0xFFA91D3A), fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Color(0xFFA91D3A),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   const SizedBox(height: 32),
                   SizedBox(
@@ -127,7 +163,11 @@ class ProductDetailScreen extends StatelessWidget {
                       ),
                       child: const Text(
                         'ADD TO CART',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFEEEEEE),
+                        ),
                       ),
                     ),
                   ),

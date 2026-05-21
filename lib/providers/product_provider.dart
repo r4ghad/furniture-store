@@ -1,67 +1,120 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/product_model.dart';
+import '../services/firestore_service.dart';
 import '../services/api_service.dart';
 import '../services/cache_service.dart';
 
 class ProductProvider extends ChangeNotifier {
   List<Product> _products = [];
-  bool _isLoading = false; // ✅ يبدأ بـ false — التحميل لم يبدأ بعد
+  bool _isLoading = false;
   bool _isOffline = false;
-  bool _hasLoaded = false;
+  StreamSubscription? _productsSubscription;
 
   List<Product> get products => _products;
   bool get isLoading => _isLoading;
   bool get isOffline => _isOffline;
 
-  // تحميل المنتجات من API (مرة واحدة فقط)
-  Future<void> fetchProducts({bool force = false}) async {
-    // ✅ إذا تم التحميل مسبقاً — لا نعيد التحميل (الكاش كافٍ)
-    if (_hasLoaded && !force) return;
+  // ✅ قراءة المنتجات من Firestore باستخدام snapshots() (real-time updates)
+  void subscribeToProducts() {
+    _productsSubscription?.cancel();
+    _isLoading = true;
+    notifyListeners();
 
-    // ✅ لا نظهر شاشة التحميل إذا كان لدينا منتجات مسبقاً من الكاش
-    if (_products.isEmpty) {
-      _isLoading = true;
-      notifyListeners();
-    }
+    _productsSubscription = FirestoreService.getProductsStream().listen(
+      (products) {
+        _products = products;
+        _isLoading = false;
+        _isOffline = false;
+        notifyListeners();
+        print('✅ Products synced from Firestore: ${products.length}');
+      },
+      onError: (e) {
+        print('❌ Firestore error: $e');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  // ✅ إيقاف الاشتراك
+  void unsubscribeFromProducts() {
+    _productsSubscription?.cancel();
+    _productsSubscription = null;
+  }
+
+  // ✅ تحميل المنتجات (fallback: API ثم Cache)
+  Future<void> fetchProducts({bool force = false}) async {
+    if (_products.isNotEmpty && !force) return;
+
+    _isLoading = true;
+    notifyListeners();
 
     try {
-      final products = await ApiService.fetchProducts();
-      _products = products;
-      _isOffline = false; // تم الاتصال بنجاح
-      await CacheService.saveProducts(products);
-      print('✅ Products fetched from API and saved to cache: ${products.length}');
-      _hasLoaded = true;
-    } catch (e) {
-      print('❌ API Error: $e');
-      // ✅ عند فشل الـ API — نعتمد على الكاش ونظهر رسالة الأوفلاين
-      final cachedProducts = await CacheService.loadProducts();
-      if (cachedProducts.isNotEmpty) {
-        _products = cachedProducts;
-        _isOffline = true; // ✅ نظهر رسالة الأوفلاين هنا فقط لأن الـ API فشل
-        _hasLoaded = true;
-        print('📴 Offline mode — loaded ${cachedProducts.length} products from cache');
+      // جرب قراءة المنتجات من Firestore أولاً
+      final snapshot = await FirestoreService.getProductsStream().first;
+      if (snapshot.isNotEmpty) {
+        _products = snapshot;
+        _isOffline = false;
+        print('✅ Products loaded from Firestore: ${_products.length}');
       } else {
-        _products = [];
-        _isOffline = true;
-        print('❌ No cached products found');
+        // إذا كانت Firestore فارغة، جرب API
+        await _loadFromApi();
       }
+    } catch (e) {
+      print('❌ Firestore unavailable, trying API: $e');
+      await _loadFromApi();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  // ✅ تحميل المنتجات من ملف JSON المحلي عند بدء التشغيل
+  Future<void> _loadFromApi() async {
+    try {
+      final products = await ApiService.fetchProducts();
+      _products = products;
+      _isOffline = false;
+
+      // حفظ في Cache كنسخة احتياطية
+      await CacheService.saveProducts(products);
+
+      // حفظ في Firestore للاستخدام المستقبلي
+      await FirestoreService.saveProducts(products);
+
+      print(
+        '✅ Products fetched from API and saved to Firestore: ${products.length}',
+      );
+    } catch (e) {
+      print('❌ API Error: $e');
+      // ✅ عند فشل الـ API — نعتمد على الكاش
+      final cachedProducts = await CacheService.loadProducts();
+      if (cachedProducts.isNotEmpty) {
+        _products = cachedProducts;
+        _isOffline = true;
+        print(
+          '📴 Offline mode — loaded ${cachedProducts.length} products from cache',
+        );
+      }
+    }
+  }
+
+  // ✅ تحميل المنتجات من ملف JSON المحلي عند بدء التشغيل (للـ offline)
   Future<void> loadProductsFromCache() async {
     final cachedProducts = await CacheService.loadProducts();
     print('✅ Loading from cache, found: ${cachedProducts.length} products');
 
     if (cachedProducts.isNotEmpty) {
       _products = cachedProducts;
-      _isOffline = false;  // ✅ لا نظهر رسالة الأوفلاين حتى نتأكد من فشل الـ API
-      _hasLoaded = false;  // ✅ نتركه false لكي يقوم fetchProducts بجلب الجديد من الإنترنت
+      _isOffline = false;
       _isLoading = false;
       notifyListeners();
     }
   }
-}
+
+  @override
+  void dispose() {
+    unsubscribeFromProducts();
+    super.dispose();
+  }
+}

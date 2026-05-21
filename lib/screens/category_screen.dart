@@ -16,7 +16,6 @@ class CategoryScreen extends StatefulWidget {
 class _CategoryScreenState extends State<CategoryScreen> {
   String _selectedCategory = 'Living Rooms';
 
-
   List<Product> _getFilteredProducts(List<Product> allProducts) {
     return allProducts.where((p) => p.category == _selectedCategory).toList();
   }
@@ -60,19 +59,44 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
             ),
 
-          const Text('Categories', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
+          const Text(
+            'Categories',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFEEEEEE),
+            ),
+          ),
           const SizedBox(height: 4),
-          const Text('Browse furniture by category', style: TextStyle(color: Color(0xFFC73659), fontSize: 14)),
+          const Text(
+            'Browse furniture by category',
+            style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
+          ),
           const SizedBox(height: 24),
 
           // أزرار التصنيفات
           Row(
             children: [
-              _buildCategoryCard('Living Rooms', '🛋️', 'Living', const Color(0xFFA91D3A)),
+              _buildCategoryCard(
+                'Living Rooms',
+                '🛋️',
+                'Living',
+                const Color(0xFFA91D3A),
+              ),
               const SizedBox(width: 12),
-              _buildCategoryCard('Bedrooms', '🛏️', 'Bedroom', const Color(0xFFC73659)),
+              _buildCategoryCard(
+                'Bedrooms',
+                '🛏️',
+                'Bedroom',
+                const Color(0xFFA91D3A),
+              ),
               const SizedBox(width: 12),
-              _buildCategoryCard('Kitchen', '🍳', 'Kitchen', const Color(0xFFA91D3A)),
+              _buildCategoryCard(
+                'Kitchen',
+                '🍳',
+                'Kitchen',
+                const Color(0xFFA91D3A),
+              ),
             ],
           ),
 
@@ -90,7 +114,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   children: [
                     CircularProgressIndicator(color: Color(0xFFC73659)),
                     SizedBox(height: 16),
-                    Text('Loading products...', style: TextStyle(color: Color(0xFFEEEEEE))),
+                    Text(
+                      'Loading products...',
+                      style: TextStyle(color: Color(0xFFEEEEEE)),
+                    ),
                   ],
                 ),
               ),
@@ -100,18 +127,27 @@ class _CategoryScreenState extends State<CategoryScreen> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
-                child: Text('No products found', style: TextStyle(color: Color(0xFFC73659))),
+                child: Text(
+                  'No products found',
+                  style: TextStyle(color: Color(0xFFC73659)),
+                ),
               ),
             ),
 
           if (!isLoading && allProducts.isNotEmpty)
-            ...filteredProducts.map((product) => _buildProductCard(product, favoriteProvider, cartProvider)),
+            ...filteredProducts.map(
+              (product) =>
+                  _buildProductCard(product, favoriteProvider, cartProvider),
+            ),
 
           if (!isLoading && allProducts.isNotEmpty && filteredProducts.isEmpty)
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(32),
-                child: Text('No products in this category', style: TextStyle(color: Color(0xFFC73659))),
+                child: Text(
+                  'No products in this category',
+                  style: TextStyle(color: Color(0xFFC73659)),
+                ),
               ),
             ),
         ],
@@ -119,7 +155,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  Widget _buildCategoryCard(String category, String emoji, String shortName, Color color) {
+  Widget _buildCategoryCard(
+    String category,
+    String emoji,
+    String shortName,
+    Color color,
+  ) {
     final isSelected = _selectedCategory == category;
     return Expanded(
       child: GestureDetector(
@@ -130,10 +171,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
-            gradient: isSelected ? LinearGradient(colors: [color, color.withOpacity(0.7)]) : null,
+            gradient: isSelected
+                ? LinearGradient(colors: [color, color.withValues(alpha: 0.7)])
+                : null,
             color: isSelected ? null : const Color(0xFF151515),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isSelected ? color : const Color(0xFFC73659), width: 1.5),
+            border: Border.all(
+              color: isSelected ? color : color.withValues(alpha: 0.5),
+              width: 1.5,
+            ),
           ),
           child: Column(
             children: [
@@ -142,7 +188,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
               Text(
                 shortName,
                 style: TextStyle(
-                  color: isSelected ? const Color(0xFFEEEEEE) : const Color(0xFFC73659),
+                  color: isSelected
+                      ? const Color(0xFFEEEEEE)
+                      : const Color(0xFFC73659),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -169,24 +217,50 @@ class _CategoryScreenState extends State<CategoryScreen> {
         title = '🍳 Kitchen';
         sub = 'Functional and modern kitchen furniture';
         break;
+      case 'Home Decoration':
+        title = '🏠 Home Decoration';
+        sub = 'Beautiful decorations for your home';
+        break;
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFEEEEEE),
+          ),
+        ),
         const SizedBox(height: 4),
-        Text(sub, style: const TextStyle(color: Color(0xFFC73659), fontSize: 12)),
+        Text(
+          sub,
+          style: const TextStyle(color: Color(0xFFC73659), fontSize: 12),
+        ),
       ],
     );
   }
 
-  Widget _buildProductCard(Product product, FavoriteProvider favoriteProvider, CartProvider cartProvider) {
+  Widget _buildProductCard(
+    Product product,
+    FavoriteProvider favoriteProvider,
+    CartProvider cartProvider,
+  ) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product))),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(product: product),
+        ),
+      ),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: const Color(0xFF151515), borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(
+          color: const Color(0xFF151515),
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Row(
           children: [
             ClipRRect(
@@ -209,36 +283,78 @@ class _CategoryScreenState extends State<CategoryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
-                  Text(product.category, style: const TextStyle(color: Color(0xFFC73659), fontSize: 12)),
-                  Text('\$${product.price.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                  ),
+                  Text(
+                    product.category,
+                    style: const TextStyle(
+                      color: Color(0xFFC73659),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    '\$${product.price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                  ),
                 ],
               ),
             ),
             IconButton(
-              onPressed: () {
-                favoriteProvider.toggleFavorite(product);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(favoriteProvider.isFavorite(product) ? 'Added to favorites' : 'Removed from favorites'),
-                    duration: const Duration(milliseconds: 500),
-                    backgroundColor: const Color(0xFFA91D3A),
-                  ),
-                );
+              onPressed: () async {
+                final wasFavorite = favoriteProvider.isFavorite(product);
+                await favoriteProvider.toggleFavorite(product);
+                await Future.delayed(const Duration(milliseconds: 200));
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        !wasFavorite
+                            ? 'Added to favorites'
+                            : 'Removed from favorites',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      duration: const Duration(milliseconds: 500),
+                      backgroundColor: const Color(0xFFA91D3A),
+                    ),
+                  );
+                }
               },
               icon: Icon(
-                favoriteProvider.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-                color: favoriteProvider.isFavorite(product) ? const Color(0xFFA91D3A) : const Color(0xFFC73659),
+                favoriteProvider.isFavorite(product)
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: favoriteProvider.isFavorite(product)
+                    ? const Color(0xFFA91D3A)
+                    : const Color(0xFFC73659),
               ),
             ),
             IconButton(
               onPressed: () {
                 cartProvider.addToCart(product);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Added to cart'), duration: Duration(milliseconds: 500), backgroundColor: Color(0xFFA91D3A)),
+                  const SnackBar(
+                    content: Text(
+                      'Added to cart',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    duration: Duration(milliseconds: 500),
+                    backgroundColor: Color(0xFFA91D3A),
+                  ),
                 );
               },
-              icon: const Icon(Icons.add_circle, color: Color(0xFFC73659), size: 30),
+              icon: const Icon(
+                Icons.add_circle,
+                color: Color(0xFFC73659),
+                size: 30,
+              ),
             ),
           ],
         ),

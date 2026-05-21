@@ -47,7 +47,10 @@ class _HomeScreenState extends State<HomeScreen> {
             if (isOffline)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
                 margin: const EdgeInsets.only(bottom: 12),
                 decoration: BoxDecoration(
                   color: const Color(0xFFA91D3A).withOpacity(0.2),
@@ -75,7 +78,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       CircularProgressIndicator(color: Color(0xFFC73659)),
                       SizedBox(height: 16),
-                      Text('Loading products...', style: TextStyle(color: Color(0xFFEEEEEE))),
+                      Text(
+                        'Loading products...',
+                        style: TextStyle(color: Color(0xFFEEEEEE)),
+                      ),
                     ],
                   ),
                 ),
@@ -85,7 +91,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(32),
-                  child: Text('No products found', style: TextStyle(color: Color(0xFFC73659))),
+                  child: Text(
+                    'No products found',
+                    style: TextStyle(color: Color(0xFFC73659)),
+                  ),
                 ),
               ),
 
@@ -96,11 +105,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text(
                     'Trending',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                   TextButton(
                     onPressed: () {
-                      _showAllProductsDialog(context, 'Trending Products', trendingProducts);
+                      _showAllProductsDialog(
+                        context,
+                        'Trending Products',
+                        trendingProducts,
+                      );
                     },
                     child: const Text(
                       'See all',
@@ -122,7 +139,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: trendingProducts.length,
                   itemBuilder: (ctx, index) {
                     final product = trendingProducts[index];
-                    return _buildProductCard(product, favoriteProvider, cartProvider);
+                    return _buildProductCard(
+                      product,
+                      favoriteProvider,
+                      cartProvider,
+                    );
                   },
                 ),
               ),
@@ -135,11 +156,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text(
                     'Most Requested',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                   TextButton(
                     onPressed: () {
-                      _showAllProductsDialog(context, 'Most Requested Products', mostRequestedProducts);
+                      _showAllProductsDialog(
+                        context,
+                        'Most Requested Products',
+                        mostRequestedProducts,
+                      );
                     },
                     child: const Text(
                       'See all',
@@ -161,7 +190,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: mostRequestedProducts.length,
                   itemBuilder: (ctx, index) {
                     final product = mostRequestedProducts[index];
-                    return _buildProductCard(product, favoriteProvider, cartProvider);
+                    return _buildProductCard(
+                      product,
+                      favoriteProvider,
+                      cartProvider,
+                    );
                   },
                 ),
               ),
@@ -172,12 +205,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductCard(Product product, FavoriteProvider favoriteProvider, CartProvider cartProvider) {
+  Widget _buildProductCard(
+    Product product,
+    FavoriteProvider favoriteProvider,
+    CartProvider cartProvider,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)),
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
+          ),
         );
       },
       child: Container(
@@ -195,7 +234,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Image.network(
                     product.imageUrl,
                     height: 150,
@@ -204,7 +245,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     errorBuilder: (_, __, ___) => Container(
                       height: 150,
                       color: const Color(0xFF1E1E1E),
-                      child: const Icon(Icons.image, size: 50, color: Color(0xFFC73659)),
+                      child: const Icon(
+                        Icons.image,
+                        size: 50,
+                        color: Color(0xFFC73659),
+                      ),
                     ),
                   ),
                 ),
@@ -221,13 +266,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                       icon: Icon(
-                        favoriteProvider.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-                        color: favoriteProvider.isFavorite(product) ? const Color(0xFFA91D3A) : const Color(0xFFEEEEEE),
+                        favoriteProvider.isFavorite(product)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: favoriteProvider.isFavorite(product)
+                            ? const Color(0xFFA91D3A)
+                            : const Color(0xFFEEEEEE),
                         size: 22,
                       ),
-                      onPressed: () {
-                        favoriteProvider.toggleFavorite(product);
-                        _showFavoriteSnackbar(context, favoriteProvider.isFavorite(product));
+                      onPressed: () async {
+                        final wasFavorite = favoriteProvider.isFavorite(
+                          product,
+                        );
+                        await favoriteProvider.toggleFavorite(product);
+                        // ننتظر لحظة حتى يحدث الـ stream ثم نعرض الرسالة
+                        await Future.delayed(const Duration(milliseconds: 200));
+                        if (context.mounted) {
+                          _showFavoriteSnackbar(
+                            context,
+                            !wasFavorite, // نعرض العكس لأن الـ stream لم يحدث بعد
+                          );
+                        }
                       },
                     ),
                   ),
@@ -242,27 +301,42 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     product.category,
-                    style: const TextStyle(color: Color(0xFFC73659), fontSize: 11),
+                    style: const TextStyle(
+                      color: Color(0xFFC73659),
+                      fontSize: 11,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
                       Text(
                         '\$${product.price.toStringAsFixed(0)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFEEEEEE)),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xFFEEEEEE),
+                        ),
                       ),
                       if (product.oldPrice != null) ...[
                         const SizedBox(width: 6),
                         Text(
                           '\$${product.oldPrice!.toStringAsFixed(0)}',
-                          style: const TextStyle(decoration: TextDecoration.lineThrough, color: Color(0xFFC73659), fontSize: 12),
+                          style: const TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: Color(0xFFC73659),
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
@@ -290,9 +364,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add_shopping_cart, size: 16, color: Color(0xFFEEEEEE)),
+                    Icon(
+                      Icons.add_shopping_cart,
+                      size: 16,
+                      color: Color(0xFFEEEEEE),
+                    ),
                     SizedBox(width: 6),
-                    Text('Add to Cart', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
+                    Text(
+                      'Add to Cart',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFEEEEEE),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -303,9 +388,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showAllProductsDialog(BuildContext context, String title, List<Product> products) {
+  void _showAllProductsDialog(
+    BuildContext context,
+    String title,
+    List<Product> products,
+  ) {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+    final favoriteProvider = Provider.of<FavoriteProvider>(
+      context,
+      listen: false,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -336,7 +428,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     title,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                 ),
                 Expanded(
@@ -345,7 +441,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
-                      return _buildProductListItem(context, product, favoriteProvider, cartProvider);
+                      return _buildProductListItem(
+                        context,
+                        product,
+                        favoriteProvider,
+                        cartProvider,
+                      );
                     },
                   ),
                 ),
@@ -357,11 +458,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProductListItem(BuildContext context, Product product, FavoriteProvider favoriteProvider, CartProvider cartProvider) {
+  Widget _buildProductListItem(
+    BuildContext context,
+    Product product,
+    FavoriteProvider favoriteProvider,
+    CartProvider cartProvider,
+  ) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
-        Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDetailScreen(product: product)));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
+          ),
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -383,7 +494,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 60,
                   height: 60,
                   color: const Color(0xFF1E1E1E),
-                  child: const Icon(Icons.image, size: 30, color: Color(0xFFC73659)),
+                  child: const Icon(
+                    Icons.image,
+                    size: 30,
+                    color: Color(0xFFC73659),
+                  ),
                 ),
               ),
             ),
@@ -392,16 +507,38 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
-                  Text(product.category, style: const TextStyle(color: Color(0xFFC73659), fontSize: 12)),
-                  Text('\$${product.price.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE))),
+                  Text(
+                    product.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                  ),
+                  Text(
+                    product.category,
+                    style: const TextStyle(
+                      color: Color(0xFFC73659),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    '\$${product.price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEEEEEE),
+                    ),
+                  ),
                 ],
               ),
             ),
             IconButton(
               icon: Icon(
-                favoriteProvider.isFavorite(product) ? Icons.favorite : Icons.favorite_border,
-                color: favoriteProvider.isFavorite(product) ? const Color(0xFFA91D3A) : const Color(0xFFC73659),
+                favoriteProvider.isFavorite(product)
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                color: favoriteProvider.isFavorite(product)
+                    ? const Color(0xFFA91D3A)
+                    : const Color(0xFFC73659),
               ),
               onPressed: () {
                 favoriteProvider.toggleFavorite(product);
@@ -412,7 +549,11 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 cartProvider.addToCart(product);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Added to cart'), duration: Duration(milliseconds: 500), backgroundColor: Color(0xFFA91D3A)),
+                  const SnackBar(
+                    content: Text('Added to cart'),
+                    duration: Duration(milliseconds: 500),
+                    backgroundColor: Color(0xFFA91D3A),
+                  ),
                 );
               },
             ),
@@ -425,9 +566,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showFavoriteSnackbar(BuildContext context, bool isFav) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(isFav ? 'Added to favorites' : 'Removed from favorites'),
+        content: Text(
+          isFav ? 'Added to favorites' : 'Removed from favorites',
+          style: const TextStyle(color: Colors.white),
+        ),
         duration: const Duration(seconds: 1),
-        backgroundColor: isFav ? const Color(0xFFA91D3A) : const Color(0xFF151515),
+        backgroundColor: const Color(0xFFA91D3A),
       ),
     );
   }
@@ -435,7 +579,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showCartSnackbar(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Added to cart'),
+        content: Text(
+          'Added to cart',
+          style: const TextStyle(color: Colors.white),
+        ),
         duration: Duration(seconds: 1),
         backgroundColor: Color(0xFFA91D3A),
       ),

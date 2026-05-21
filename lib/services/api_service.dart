@@ -4,106 +4,121 @@ import 'package:http/http.dart' as http;
 import '../models/product_model.dart';
 
 class ApiService {
-  static const String apiUrl = 'https://api.escuelajs.co/api/v1/products';
+  // ✅ استخدام DummyJSON مع multiple categories للحصول على تنوع
+  static const String baseUrl = 'https://dummyjson.com';
 
   static Future<List<Product>> fetchProducts() async {
     try {
-      // ✅ Accept Header + Timeout 10 ثوانٍ
-      final response = await http
-          .get(
-            Uri.parse(apiUrl),
-            headers: {'Accept': 'application/json'},
-          )
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw TimeoutException(
-                'انتهت مهلة الاتصال — لم يستجب الخادم خلال 10 ثوانٍ',
-              );
-            },
+      // جلب منتجات من تصنيفات متعددة
+      final categories = [
+        'furniture',
+        'home-decoration',
+        'kitchen-accessories',
+      ];
+
+      final List<Product> allProducts = [];
+
+      for (final category in categories) {
+        final response = await http
+            .get(
+              Uri.parse('$baseUrl/products/category/$category?limit=40'),
+              headers: {'Accept': 'application/json'},
+            )
+            .timeout(
+              const Duration(seconds: 15),
+              onTimeout: () {
+                throw TimeoutException('Timeout for $category');
+              },
+            );
+
+        if (response.statusCode == 200) {
+          final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+          final List<dynamic> data = jsonResponse['products'] ?? [];
+
+          allProducts.addAll(
+            data
+                .map(
+                  (json) =>
+                      Product.fromJson(_convertToOurFormat(json, category)),
+                )
+                .toList(),
           );
-
-      // ✅ معالجة أكواد HTTP المختلفة
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-
-        // فلترة المنتجات التي تحتوي على كلمات أثاث
-        final furnitureProducts = data.where((product) {
-          final title = product['title'].toLowerCase();
-          final category = product['category']['name'].toLowerCase();
-
-          return title.contains('sofa') ||
-              title.contains('chair') ||
-              title.contains('table') ||
-              title.contains('bed') ||
-              title.contains('lamp') ||
-              title.contains('cabinet') ||
-              title.contains('wardrobe') ||
-              title.contains('desk') ||
-              category.contains('furniture') ||
-              category.contains('home');
-        }).toList();
-
-        // نأخذ أول 15 منتج أثاث
-        final limitedData = furnitureProducts.take(15).toList();
-
-        return limitedData
-            .map((json) => Product.fromJson(_convertToOurFormat(json)))
-            .toList();
-
-      } else if (response.statusCode == 401) {
-        throw Exception('غير مصرح بالوصول (401 Unauthorized)');
-
-      } else if (response.statusCode == 404) {
-        throw Exception('المسار غير موجود (404 Not Found)');
-
-      } else if (response.statusCode == 500) {
-        throw Exception('خطأ داخلي في الخادم (500 Internal Server Error)');
-
-      } else {
-        throw Exception(
-          'فشل تحميل المنتجات — كود الخطأ: ${response.statusCode}',
-        );
+        }
       }
 
-    } on TimeoutException catch (e) {
-      // ✅ معالجة Timeout بشكل منفصل
-      throw Exception('Timeout: $e');
+      if (allProducts.isEmpty) {
+        throw Exception('لم يتم تحميل أي منتجات');
+      }
 
+      return allProducts;
+    } on TimeoutException catch (e) {
+      throw Exception('Timeout: $e');
     } catch (e) {
       throw Exception('Network error: $e');
     }
   }
 
-  static Map<String, dynamic> _convertToOurFormat(Map<String, dynamic> apiProduct) {
-    final String title = apiProduct['title'].toLowerCase();
-    final String apiCategory = apiProduct['category']['name'] ?? '';
+  static Map<String, dynamic> _convertToOurFormat(
+    Map<String, dynamic> apiProduct,
+    String category,
+  ) {
+    final String title = apiProduct['title']?.toString().toLowerCase() ?? '';
+    final String apiCategory = category.toLowerCase();
 
-    // توزيع التصنيفات
-    String category;
-    if (title.contains('bed') || title.contains('mattress') || apiCategory.contains('bedroom')) {
-      category = 'Bedrooms';
-    } else if (title.contains('dining') || title.contains('kitchen') || apiCategory.contains('kitchen')) {
-      category = 'Kitchen';
+    // توزيع التصنيفات بناءً على اسم المنتج والتصنيف الأصلي
+    String categoryResult;
+    if (title.contains('bed') ||
+        title.contains('mattress') ||
+        (apiCategory == 'furniture' && title.contains('chair'))) {
+      categoryResult = 'Bedrooms';
+    } else if (title.contains('chair') ||
+        title.contains('sofa') ||
+        title.contains('table') ||
+        title.contains('lamp')) {
+      categoryResult = 'Living Rooms';
+    } else if (apiCategory == 'kitchen-accessories' ||
+        title.contains('kitchen') ||
+        title.contains('cooker') ||
+        title.contains('pan') ||
+        title.contains('pot')) {
+      categoryResult = 'Kitchen';
+    } else if (apiCategory == 'home-decoration' ||
+        title.contains('plant') ||
+        title.contains('mirror') ||
+        title.contains('clock') ||
+        title.contains('frame') ||
+        title.contains('pillow')) {
+      categoryResult = 'Home Decoration';
     } else {
-      category = 'Living Rooms';
+      categoryResult = 'Living Rooms';
     }
 
-    // الحصول على أول صورة
+    // الحصول على الصورة
     String imageUrl = '';
-    if (apiProduct['images'] != null && apiProduct['images'].isNotEmpty) {
-      imageUrl = apiProduct['images'][0];
+    if (apiProduct['images'] != null &&
+        (apiProduct['images'] as List).isNotEmpty) {
+      imageUrl = apiProduct['images'][0].toString();
+    } else if (apiProduct['thumbnail'] != null) {
+      imageUrl = apiProduct['thumbnail'].toString();
     }
+
+    // حساب oldPrice من discountPercentage
+    final double price = (apiProduct['price'] as num?)?.toDouble() ?? 0.0;
+    final double? discountPercent = (apiProduct['discountPercentage'] as num?)
+        ?.toDouble();
+    final double? oldPrice = discountPercent != null
+        ? price / (1 - discountPercent / 100)
+        : null;
 
     return {
       'id': apiProduct['id'].toString(),
-      'name': apiProduct['title'],
-      'category': category,
+      'name': apiProduct['title'] ?? '',
+      'category': categoryResult,
       'description': apiProduct['description'] ?? '',
-      'price': (apiProduct['price'] as num).toDouble(),
-      'oldPrice': null,
+      'price': price,
+      'oldPrice': oldPrice,
       'imageUrl': imageUrl,
-      'discountPercent': null,
+      'discountPercent': discountPercent?.toInt(),
       'timeLeft': null,
     };
   }

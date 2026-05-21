@@ -1,8 +1,17 @@
-# Assignment 4
+# Flutter E-Commerce – Mobile Applications Course
 
-Based on Assignment 3 (E-Commerce App with Provider)
+## Lecture 7 – Provider & UI
+- Home, Favorites, Cart, Categories, Profile
+- Provider (state management)
+- Mock furniture data
 
-### New Features Added (Assignment 4)
-- Fetch real products from REST API (Exercise 1)
-- Save favorites permanently using SharedPreferences (Exercise 2)
-- Offline support with local JSON cache (Exercise 3)
+## Lecture 9 – API & Offline
+- Fetch products from API
+- Loading indicator
+- Save favorites 
+- Offline support + "Offline mode"
+
+## Lecture 10 – Firebase & Firestore
+- Firebase Auth (Sign Up / Sign In)
+- Products from Firestore 
+- Personal favorites (users/{uid}/favorites)

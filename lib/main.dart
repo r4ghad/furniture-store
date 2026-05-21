@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorite_provider.dart';
 import 'providers/product_provider.dart';
@@ -8,37 +11,31 @@ import 'screens/category_screen.dart';
 import 'screens/favorite_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/welcome_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // تحميل المنتجات من Cache
+  // تحميل المنتجات من Cache (للـ offline)
   final productProvider = ProductProvider();
   await productProvider.loadProductsFromCache();
 
-  // تحميل المفضلة من الملف
-  final favoriteProvider = FavoriteProvider();
-  await favoriteProvider.loadFavorites();
-
-  await Future.delayed(const Duration(seconds: 1)); // تأخير ثانية
-
-  print(
-    '✅ main.dart: تم تحميل ${favoriteProvider.favoriteCount} منتج في المفضلة',
-  );
-
   runApp(
-    MyApp(productProvider: productProvider, favoriteProvider: favoriteProvider),
+    MyApp(productProvider: productProvider),
   );
 }
 
 class MyApp extends StatelessWidget {
   final ProductProvider productProvider;
-  final FavoriteProvider favoriteProvider;
 
   const MyApp({
     super.key,
     required this.productProvider,
-    required this.favoriteProvider,
   });
 
   @override
@@ -46,7 +43,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => favoriteProvider),
+        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
         ChangeNotifierProvider(create: (_) => productProvider),
       ],
       child: MaterialApp(
@@ -61,8 +58,57 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        home: const MainScreen(),
+        home: const AuthGate(),
       ),
+    );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(color: Color(0xFFC73659)),
+            ),
+          );
+        }
+
+        final user = snapshot.data;
+        if (user != null) {
+          // ✅ عند تسجيل الدخول: الاشتراك في المنتجات والمفضلة من Firestore
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final productProvider = Provider.of<ProductProvider>(context, listen: false);
+            final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+            
+            productProvider.subscribeToProducts();
+            favoriteProvider.subscribeToFavorites();
+            
+            print('✅ User logged in, subscribed to Firestore streams');
+          });
+          
+          return const MainScreen();
+        }
+        
+        // ✅ عند تسجيل الخروج: إلغاء الاشتراك
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final productProvider = Provider.of<ProductProvider>(context, listen: false);
+          final favoriteProvider = Provider.of<FavoriteProvider>(context, listen: false);
+          
+          productProvider.unsubscribeFromProducts();
+          favoriteProvider.unsubscribeFromFavorites();
+          
+          print('✅ User logged out, unsubscribed from Firestore');
+        });
+        
+        return const WelcomeScreen();
+      },
     );
   }
 }

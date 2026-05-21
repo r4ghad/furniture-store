@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Product {
   final String id;
   final String name;
@@ -26,6 +28,37 @@ class Product {
       return ((oldPrice! - price) / oldPrice! * 100).roundToDouble();
     }
     return discountPercent?.toDouble() ?? 0;
+  }
+
+  // ✅ تحويل المنتج إلى Map لـ Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'description': description,
+      'price': price,
+      'oldPrice': oldPrice,
+      'imageUrl': imageUrl,
+      'discountPercent': discountPercent,
+      'timeLeft': timeLeft,
+    };
+  }
+
+  // ✅ إنشاء منتج من DocumentSnapshot في Firestore
+  factory Product.fromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Product(
+      id: data['id'] ?? doc.id,
+      name: data['name'] ?? '',
+      category: data['category'] ?? '',
+      description: data['description'] ?? '',
+      price: (data['price'] as num?)?.toDouble() ?? 0.0,
+      oldPrice: data['oldPrice']?.toDouble(),
+      imageUrl: data['imageUrl'] ?? '',
+      discountPercent: data['discountPercent'],
+      timeLeft: data['timeLeft'],
+    );
   }
 
   // ✅ تحويل المنتج إلى JSON (لحفظه في Cache)

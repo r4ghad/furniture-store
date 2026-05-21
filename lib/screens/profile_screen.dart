@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorite_provider.dart';
 
@@ -11,6 +13,10 @@ class ProfileScreen extends StatelessWidget {
     final cartProvider = Provider.of<CartProvider>(context);
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
 
+    final user = FirebaseAuth.instance.currentUser;
+    final userName = user?.displayName ?? 'furniture User';
+    final userEmail = user?.email ?? 'user@furniture.com';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -19,18 +25,18 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 40),
           const CircleAvatar(
             radius: 50,
-            backgroundColor: Color(0xFFC73659),
+            backgroundColor: Color(0xFFA91D3A),
             child: Icon(Icons.person, size: 50, color: Color(0xFFEEEEEE)),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'furniture User',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+          Text(
+            userName,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'user@furniture.com',
-            style: TextStyle(fontSize: 14, color: Color(0xFFC73659)),
+          Text(
+            userEmail,
+            style: const TextStyle(fontSize: 14, color: Color(0xFFC73659)),
           ),
           const SizedBox(height: 32),
           Container(
@@ -61,6 +67,23 @@ class ProfileScreen extends StatelessWidget {
                   value: '\$${cartProvider.totalPrice.toStringAsFixed(2)}',
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () async {
+              await GoogleSignIn().signOut();
+              await FirebaseAuth.instance.signOut();
+            },
+            icon: const Icon(Icons.logout, color: Color(0xFFEEEEEE)),
+            label: const Text(
+              'Sign Out',
+              style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFA91D3A),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ],
