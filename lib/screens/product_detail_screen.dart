@@ -13,6 +13,7 @@ class ProductDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -30,7 +31,9 @@ class ProductDetailScreen extends StatelessWidget {
                   errorBuilder: (_, __, ___) => Container(
                     height: 350,
                     width: double.infinity,
-                    color: const Color(0xFF1E1E1E),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF1E1E1E)
+                        : const Color(0xFFECECEC),
                     child: const Icon(
                       Icons.image,
                       size: 80,
@@ -41,28 +44,40 @@ class ProductDetailScreen extends StatelessWidget {
                 Positioned(
                   top: 40,
                   left: 16,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Color(0xFFEEEEEE),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      shape: BoxShape.circle,
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: Color(0xFFEEEEEE),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ),
                 ),
                 Positioned(
                   top: 40,
                   right: 16,
-                  child: IconButton(
-                    icon: Icon(
-                      favoriteProvider.isFavorite(product)
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      color: favoriteProvider.isFavorite(product)
-                          ? const Color(0xFFA91D3A)
-                          : const Color(0xFFEEEEEE),
-                      size: 28,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.3),
+                      shape: BoxShape.circle,
                     ),
-                    onPressed: () => favoriteProvider.toggleFavorite(product),
+                    child: IconButton(
+                      icon: Icon(
+                        favoriteProvider.isFavorite(product)
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: favoriteProvider.isFavorite(product)
+                            ? const Color(0xFFA91D3A)
+                            : const Color(0xFFEEEEEE),
+                        size: 28,
+                      ),
+                      onPressed: () => favoriteProvider.toggleFavorite(product),
+                    ),
                   ),
                 ),
               ],
@@ -74,10 +89,10 @@ class ProductDetailScreen extends StatelessWidget {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -85,7 +100,7 @@ class ProductDetailScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        product.category,
+                        product.category.isNotEmpty ? product.category : 'Furniture',
                         style: const TextStyle(
                           fontSize: 16,
                           color: Color(0xFFC73659),
@@ -93,29 +108,31 @@ class ProductDetailScreen extends StatelessWidget {
                       ),
                       Text(
                         '\$${product.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFFEEEEEE),
+                          color: textPrimaryColor,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Description',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    product.description,
-                    style: const TextStyle(
+                    product.description.isNotEmpty
+                        ? product.description
+                        : 'No description available for this item.',
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Color(0xFFC73659),
+                      color: textPrimaryColor.withOpacity(0.7),
                     ),
                   ),
                   const SizedBox(height: 24),

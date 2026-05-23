@@ -12,18 +12,19 @@ class FavoriteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context);
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Favorites',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFEEEEEE),
+              color: textPrimaryColor,
             ),
           ),
           const SizedBox(height: 4),
@@ -72,6 +73,8 @@ class FavoriteScreen extends StatelessWidget {
     CartProvider cartProvider,
     BuildContext context,
   ) {
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -85,8 +88,15 @@ class FavoriteScreen extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -100,7 +110,9 @@ class FavoriteScreen extends StatelessWidget {
                 errorBuilder: (_, __, ___) => Container(
                   width: 80,
                   height: 80,
-                  color: const Color(0xFF1E1E1E),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF1E1E1E)
+                      : const Color(0xFFECECEC),
                   child: const Icon(
                     Icons.image,
                     size: 40,
@@ -116,15 +128,15 @@ class FavoriteScreen extends StatelessWidget {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    product.category,
+                    product.category.isNotEmpty ? product.category : 'Furniture',
                     style: const TextStyle(
                       color: Color(0xFFC73659),
                       fontSize: 12,
@@ -133,10 +145,10 @@ class FavoriteScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '\$${product.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                 ],
@@ -163,7 +175,7 @@ class FavoriteScreen extends StatelessWidget {
                       const SnackBar(
                         content: Text(
                           'Added to cart',
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white),
                         ),
                         backgroundColor: Color(0xFFA91D3A),
                       ),

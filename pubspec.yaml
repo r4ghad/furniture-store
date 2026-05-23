@@ -41,6 +41,8 @@ dependencies:
   firebase_auth: ^6.5.1
   cloud_firestore: ^6.4.1
   google_sign_in: 6.2.1
+  sqflite: ^2.3.3+1
+  path: ^1.9.0
 
 dev_dependencies:
   flutter_test:

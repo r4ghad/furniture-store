@@ -7,6 +7,12 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outlineColor = isDark
+        ? const Color(0xFFEEEEEE)
+        : const Color(0xFF151515);
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -17,20 +23,25 @@ class WelcomeScreen extends StatelessWidget {
             children: [
               const Spacer(),
               const Spacer(),
-              const Text(
-                'Welcome to Furniture Store',
+              Text(
+                'Welcome to\nFurniture Store',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFEEEEEE),
+                  color: textPrimary,
+                  height: 1.3,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Discover the best furniture for your home with our exclusive collection.',
+              Text(
+                'Discover the best furniture for your home\nwith our exclusive collection.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textPrimary.withValues(alpha: 0.6),
+                  height: 1.5,
+                ),
               ),
               const Spacer(),
               ElevatedButton(
@@ -69,18 +80,18 @@ class WelcomeScreen extends StatelessWidget {
                   );
                 },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFEEEEEE)),
+                  side: BorderSide(color: outlineColor, width: 1.5),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Sign Up',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFEEEEEE),
+                    color: textPrimary,
                   ),
                 ),
               ),

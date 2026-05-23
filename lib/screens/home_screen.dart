@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isLoading = productProvider.isLoading;
     final products = productProvider.products;
     final isOffline = productProvider.isOffline;
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
 
     // تقسيم المنتجات إلى Trending و Most Requested
     final trendingProducts = products.take(3).toList();
@@ -80,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(height: 16),
                       Text(
                         'Loading products...',
-                        style: TextStyle(color: Color(0xFFEEEEEE)),
+                        style: TextStyle(color: Color(0xFFC73659)),
                       ),
                     ],
                   ),
@@ -103,12 +104,12 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Trending',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   TextButton(
@@ -154,12 +155,12 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Most Requested',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   TextButton(
@@ -210,6 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
     FavoriteProvider favoriteProvider,
     CartProvider cartProvider,
   ) {
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -224,8 +227,15 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 300,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,7 +254,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) => Container(
                       height: 150,
-                      color: const Color(0xFF1E1E1E),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E1E1E)
+                          : const Color(0xFFECECEC),
                       child: const Icon(
                         Icons.image,
                         size: 50,
@@ -259,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   right: 8,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF151515).withOpacity(0.5),
+                      color: Colors.black.withOpacity(0.4),
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
@@ -281,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         await favoriteProvider.toggleFavorite(product);
                         // ننتظر لحظة حتى يحدث الـ stream ثم نعرض الرسالة
                         await Future.delayed(const Duration(milliseconds: 200));
-                        if (context.mounted) {
+                        if (mounted) {
                           _showFavoriteSnackbar(
                             context,
                             !wasFavorite, // نعرض العكس لأن الـ stream لم يحدث بعد
@@ -301,10 +313,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -322,10 +334,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         '\$${product.price.toStringAsFixed(0)}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFFEEEEEE),
+                          color: textPrimaryColor,
                         ),
                       ),
                       if (product.oldPrice != null) ...[
@@ -402,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF151515),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -428,10 +440,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
@@ -464,6 +476,8 @@ class _HomeScreenState extends State<HomeScreen> {
     FavoriteProvider favoriteProvider,
     CartProvider cartProvider,
   ) {
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
+
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
@@ -478,8 +492,15 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -493,7 +514,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 errorBuilder: (_, __, ___) => Container(
                   width: 60,
                   height: 60,
-                  color: const Color(0xFF1E1E1E),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF1E1E1E)
+                      : const Color(0xFFECECEC),
                   child: const Icon(
                     Icons.image,
                     size: 30,
@@ -509,9 +532,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   Text(
@@ -523,9 +546,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   Text(
                     '\$${product.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                 ],

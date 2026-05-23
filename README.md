@@ -15,3 +15,6 @@
 - Firebase Auth (Sign Up / Sign In)
 - Products from Firestore 
 - Personal favorites (users/{uid}/favorites)
+
+## Lecture 11 – Local Storage
+- SQLite cart + Theme preferences

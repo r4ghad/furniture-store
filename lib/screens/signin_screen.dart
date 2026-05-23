@@ -55,12 +55,11 @@ class _SignInScreenState extends State<SignInScreen> {
         final authProvider = GoogleAuthProvider();
         await FirebaseAuth.instance.signInWithPopup(authProvider);
         if (mounted) {
-          Navigator.pop(context); // Go back (or auth gate handles it)
+          Navigator.pop(context);
         }
       } else {
         final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
         if (googleUser == null) {
-          // The user canceled the sign-in
           setState(() {
             _isLoading = false;
           });
@@ -75,7 +74,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
         await FirebaseAuth.instance.signInWithCredential(credential);
         if (mounted) {
-          Navigator.pop(context); // Go back (or auth gate handles it)
+          Navigator.pop(context);
         }
       }
     } catch (e) {
@@ -102,12 +101,20 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textPrimary = Theme.of(context).colorScheme.primary;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark ? Colors.grey : Colors.grey.shade400;
+    final iconColor = isDark ? Colors.grey : Colors.grey.shade600;
+    final subtleText = textPrimary.withValues(alpha: 0.6);
+    final outlineColor = isDark ? const Color(0xFFEEEEEE) : const Color(0xFF151515);
+    final googleIconColor = isDark ? const Color(0xFFEEEEEE) : const Color(0xFF151515);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In', style: TextStyle(color: Color(0xFFEEEEEE))),
-        backgroundColor: Colors.transparent,
+        title: Text('Sign In', style: TextStyle(color: textPrimary, fontWeight: FontWeight.bold)),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFFEEEEEE)),
+        iconTheme: IconThemeData(color: textPrimary),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -118,37 +125,45 @@ class _SignInScreenState extends State<SignInScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 32),
-                const Text(
+                Text(
                   'Welcome Back!',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFEEEEEE),
+                    color: textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   'Sign in to continue',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey,
+                    color: subtleText,
                   ),
                 ),
                 const SizedBox(height: 48),
                 TextFormField(
                   controller: _emailController,
-                  style: const TextStyle(color: Color(0xFFEEEEEE)),
+                  style: TextStyle(color: textPrimary),
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     labelText: 'Email',
-                    labelStyle: const TextStyle(color: Colors.grey),
-                    prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                    labelStyle: TextStyle(color: iconColor),
+                    prefixIcon: Icon(Icons.email_outlined, color: iconColor),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(color: borderColor),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Color(0xFFC73659)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.red),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.red),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -160,16 +175,16 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _passwordController,
-                  style: const TextStyle(color: Color(0xFFEEEEEE)),
+                  style: TextStyle(color: textPrimary),
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    labelStyle: const TextStyle(color: Colors.grey),
-                    prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                    labelStyle: TextStyle(color: iconColor),
+                    prefixIcon: Icon(Icons.lock_outline, color: iconColor),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Colors.grey,
+                        color: iconColor,
                       ),
                       onPressed: () {
                         setState(() {
@@ -178,11 +193,19 @@ class _SignInScreenState extends State<SignInScreen> {
                       },
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(color: Colors.grey),
+                      borderSide: BorderSide(color: borderColor),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Color(0xFFC73659)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.red),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.red),
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -213,23 +236,23 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                       ),
                 const SizedBox(height: 16),
-                const Center(
-                  child: Text('OR', style: TextStyle(color: Colors.grey)),
+                Center(
+                  child: Text('OR', style: TextStyle(color: subtleText)),
                 ),
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _signInWithGoogle,
-                  icon: const Icon(Icons.g_mobiledata, size: 32, color: Color(0xFFEEEEEE)),
-                  label: const Text(
+                  icon: Icon(Icons.g_mobiledata, size: 32, color: googleIconColor),
+                  label: Text(
                     'Sign In with Google',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimary,
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFEEEEEE)),
+                    side: BorderSide(color: outlineColor, width: 1.5),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -240,9 +263,9 @@ class _SignInScreenState extends State<SignInScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       "Don't have an account?",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: subtleText),
                     ),
                     TextButton(
                       onPressed: () {

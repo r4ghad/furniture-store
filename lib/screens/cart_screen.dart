@@ -14,9 +14,13 @@ class CartScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Shopping Cart',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 4),
           const Text(
@@ -40,9 +44,9 @@ class CartScreen extends StatelessWidget {
           else
             Column(
               children: [
-                ...cartProvider.items.map((item) => _buildCartItem(item, cartProvider)),
+                ...cartProvider.items.map((item) => _buildCartItem(context, item, cartProvider)),
                 const SizedBox(height: 24),
-                _buildPaymentSummary(cartProvider),
+                _buildPaymentSummary(context, cartProvider),
                 const SizedBox(height: 16),
                 _buildCheckoutButton(context),
               ],
@@ -52,13 +56,22 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCartItem(CartItem item, CartProvider cartProvider) {
+  Widget _buildCartItem(BuildContext context, CartItem item, CartProvider cartProvider) {
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFF151515),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -72,7 +85,9 @@ class CartScreen extends StatelessWidget {
               errorBuilder: (_, __, ___) => Container(
                 width: 80,
                 height: 80,
-                color: const Color(0xFF1E1E1E),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E1E1E)
+                    : const Color(0xFFECECEC),
                 child: const Icon(Icons.image, size: 40, color: Color(0xFFC73659)),
               ),
             ),
@@ -84,7 +99,7 @@ class CartScreen extends StatelessWidget {
               children: [
                 Text(
                   item.product.name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textPrimaryColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -100,7 +115,7 @@ class CartScreen extends StatelessWidget {
                     ),
                     Text(
                       item.quantity.toString(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textPrimaryColor),
                     ),
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline, color: Color(0xFFC73659)),
@@ -116,7 +131,7 @@ class CartScreen extends StatelessWidget {
             children: [
               Text(
                 '\$${(item.product.price * item.quantity).toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textPrimaryColor),
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Color(0xFFA91D3A)),
@@ -129,25 +144,39 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentSummary(CartProvider cartProvider) {
+  Widget _buildPaymentSummary(BuildContext context, CartProvider cartProvider) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF151515),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          const Text(
+          Text(
             'Payment Summary',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFEEEEEE)),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Total Items', style: TextStyle(color: Color(0xFFC73659))),
-              Text(cartProvider.totalItems.toString(), style: const TextStyle(color: Color(0xFFEEEEEE))),
+              Text(
+                cartProvider.totalItems.toString(),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              ),
             ],
           ),
           const SizedBox(height: 8),

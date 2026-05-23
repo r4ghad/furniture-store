@@ -30,6 +30,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final allProducts = productProvider.products;
     final filteredProducts = _getFilteredProducts(allProducts);
     final isOffline = productProvider.isOffline;
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -59,12 +60,12 @@ class _CategoryScreenState extends State<CategoryScreen> {
               ),
             ),
 
-          const Text(
+          Text(
             'Categories',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: Color(0xFFEEEEEE),
+              color: textPrimaryColor,
             ),
           ),
           const SizedBox(height: 4),
@@ -172,14 +173,21 @@ class _CategoryScreenState extends State<CategoryScreen> {
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             gradient: isSelected
-                ? LinearGradient(colors: [color, color.withValues(alpha: 0.7)])
+                ? LinearGradient(colors: [color, color.withOpacity(0.7)])
                 : null,
-            color: isSelected ? null : const Color(0xFF151515),
+            color: isSelected ? null : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? color : color.withValues(alpha: 0.5),
+              color: isSelected ? color : color.withOpacity(0.5),
               width: 1.5,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Column(
             children: [
@@ -227,10 +235,10 @@ class _CategoryScreenState extends State<CategoryScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFEEEEEE),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
         const SizedBox(height: 4),
@@ -247,6 +255,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
     FavoriteProvider favoriteProvider,
     CartProvider cartProvider,
   ) {
+    final textPrimaryColor = Theme.of(context).colorScheme.primary;
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -258,8 +268,15 @@ class _CategoryScreenState extends State<CategoryScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF151515),
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -273,7 +290,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 errorBuilder: (_, __, ___) => Container(
                   width: 70,
                   height: 70,
-                  color: const Color(0xFF1E1E1E),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF1E1E1E)
+                      : const Color(0xFFECECEC),
                   child: const Icon(Icons.image, color: Color(0xFFC73659)),
                 ),
               ),
@@ -285,9 +304,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 children: [
                   Text(
                     product.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                   Text(
@@ -299,9 +318,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   ),
                   Text(
                     '\$${product.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimaryColor,
                     ),
                   ),
                 ],
@@ -312,7 +331,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 final wasFavorite = favoriteProvider.isFavorite(product);
                 await favoriteProvider.toggleFavorite(product);
                 await Future.delayed(const Duration(milliseconds: 200));
-                if (context.mounted) {
+                if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -343,7 +362,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   const SnackBar(
                     content: Text(
                       'Added to cart',
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white),
                     ),
                     duration: Duration(milliseconds: 500),
                     backgroundColor: Color(0xFFA91D3A),
