@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/product_model.dart';
 import 'product_detail_screen.dart';
 
@@ -39,6 +40,33 @@ class _HomeScreenState extends State<HomeScreen> {
     final mostRequestedProducts = products.skip(3).take(2).toList();
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Row(
+          children: [
+            Icon(Icons.chair_outlined, color: Color(0xFFC73659), size: 28),
+            SizedBox(width: 8),
+            Text(
+              'Furniture Store',
+              style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+            ),
+          ],
+        ),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
+            ),
+            tooltip: 'Toggle Theme',
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(

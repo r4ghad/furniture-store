@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/product_model.dart';
 import 'product_detail_screen.dart';
 
@@ -30,128 +31,132 @@ class _CategoryScreenState extends State<CategoryScreen> {
     final allProducts = productProvider.products;
     final filteredProducts = _getFilteredProducts(allProducts);
     final isOffline = productProvider.isOffline;
-    final textPrimaryColor = Theme.of(context).colorScheme.primary;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // رسالة وضع غير متصل
-          if (isOffline)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFA91D3A).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFA91D3A)),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.wifi_off, size: 16, color: Color(0xFFC73659)),
-                  SizedBox(width: 8),
-                  Text(
-                    'Offline mode - showing cached products',
-                    style: TextStyle(color: Color(0xFFC73659), fontSize: 12),
-                  ),
-                ],
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Categories'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
             ),
-
-          Text(
-            'Categories',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: textPrimaryColor,
-            ),
+            tooltip: 'Toggle Theme',
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Browse furniture by category',
-            style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
-          ),
-          const SizedBox(height: 24),
-
-          // أزرار التصنيفات
-          Row(
-            children: [
-              _buildCategoryCard(
-                'Living Rooms',
-                '🛋️',
-                'Living',
-                const Color(0xFFA91D3A),
-              ),
-              const SizedBox(width: 12),
-              _buildCategoryCard(
-                'Bedrooms',
-                '🛏️',
-                'Bedroom',
-                const Color(0xFFA91D3A),
-              ),
-              const SizedBox(width: 12),
-              _buildCategoryCard(
-                'Kitchen',
-                '🍳',
-                'Kitchen',
-                const Color(0xFFA91D3A),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 32),
-          _buildCategoryTitle(),
-
-          const SizedBox(height: 12),
-
-          // شاشة التحميل
-          if (isLoading)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Column(
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // رسالة وضع غير متصل
+            if (isOffline)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFA91D3A).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFA91D3A)),
+                ),
+                child: const Row(
                   children: [
-                    CircularProgressIndicator(color: Color(0xFFC73659)),
-                    SizedBox(height: 16),
+                    Icon(Icons.wifi_off, size: 16, color: Color(0xFFC73659)),
+                    SizedBox(width: 8),
                     Text(
-                      'Loading products...',
-                      style: TextStyle(color: Color(0xFFEEEEEE)),
+                      'Offline mode - showing cached products',
+                      style: TextStyle(color: Color(0xFFC73659), fontSize: 12),
                     ),
                   ],
                 ),
               ),
+
+            // أزرار التصنيفات
+            Row(
+              children: [
+                _buildCategoryCard(
+                  'Living Rooms',
+                  '🛋️',
+                  'Living',
+                  const Color(0xFFA91D3A),
+                ),
+                const SizedBox(width: 12),
+                _buildCategoryCard(
+                  'Bedrooms',
+                  '🛏️',
+                  'Bedroom',
+                  const Color(0xFFA91D3A),
+                ),
+                const SizedBox(width: 12),
+                _buildCategoryCard(
+                  'Kitchen',
+                  '🍳',
+                  'Kitchen',
+                  const Color(0xFFA91D3A),
+                ),
+              ],
             ),
 
-          if (!isLoading && allProducts.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Text(
-                  'No products found',
-                  style: TextStyle(color: Color(0xFFC73659)),
+            const SizedBox(height: 32),
+            _buildCategoryTitle(),
+
+            const SizedBox(height: 12),
+
+            // شاشة التحميل
+            if (isLoading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(color: Color(0xFFC73659)),
+                      SizedBox(height: 16),
+                      Text(
+                        'Loading products...',
+                        style: TextStyle(color: Color(0xFFEEEEEE)),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-          if (!isLoading && allProducts.isNotEmpty)
-            ...filteredProducts.map(
-              (product) =>
-                  _buildProductCard(product, favoriteProvider, cartProvider),
-            ),
-
-          if (!isLoading && allProducts.isNotEmpty && filteredProducts.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Text(
-                  'No products in this category',
-                  style: TextStyle(color: Color(0xFFC73659)),
+            if (!isLoading && allProducts.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text(
+                    'No products found',
+                    style: TextStyle(color: Color(0xFFC73659)),
+                  ),
                 ),
               ),
-            ),
-        ],
+
+            if (!isLoading && allProducts.isNotEmpty)
+              ...filteredProducts.map(
+                (product) =>
+                    _buildProductCard(product, favoriteProvider, cartProvider),
+              ),
+
+            if (!isLoading && allProducts.isNotEmpty && filteredProducts.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Text(
+                    'No products in this category',
+                    style: TextStyle(color: Color(0xFFC73659)),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/product_model.dart';
 import 'product_detail_screen.dart';
 
@@ -12,57 +13,62 @@ class FavoriteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context);
-    final textPrimaryColor = Theme.of(context).colorScheme.primary;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Favorites',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: textPrimaryColor,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Favorites'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
             ),
+            tooltip: 'Toggle Theme',
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Your favorite items',
-            style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
-          ),
-          const SizedBox(height: 20),
-          if (favoriteProvider.favorites.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.favorite_border,
-                      size: 64,
-                      color: Color(0xFFC73659),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'No favorites yet',
-                      style: TextStyle(color: Color(0xFFC73659)),
-                    ),
-                  ],
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (favoriteProvider.favorites.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.favorite_border,
+                        size: 64,
+                        color: Color(0xFFC73659),
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'No favorites yet',
+                        style: TextStyle(color: Color(0xFFC73659)),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ...favoriteProvider.favorites.map(
+                (product) => _buildFavoriteCard(
+                  product,
+                  favoriteProvider,
+                  cartProvider,
+                  context,
                 ),
               ),
-            )
-          else
-            ...favoriteProvider.favorites.map(
-              (product) => _buildFavoriteCard(
-                product,
-                favoriteProvider,
-                cartProvider,
-                context,
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

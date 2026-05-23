@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
+import '../providers/theme_provider.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -9,49 +10,56 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Shopping Cart',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Shopping Cart'),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode_outlined
+                  : Icons.dark_mode_outlined,
             ),
+            tooltip: 'Toggle Theme',
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+            },
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Review your selected items',
-            style: TextStyle(color: Color(0xFFC73659), fontSize: 14),
-          ),
-          const SizedBox(height: 20),
-          if (cartProvider.items.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    Icon(Icons.shopping_cart_outlined, size: 64, color: Color(0xFFC73659)),
-                    SizedBox(height: 16),
-                    Text('Your cart is empty', style: TextStyle(color: Color(0xFFC73659))),
-                  ],
-                ),
-              ),
-            )
-          else
-            Column(
-              children: [
-                ...cartProvider.items.map((item) => _buildCartItem(context, item, cartProvider)),
-                const SizedBox(height: 24),
-                _buildPaymentSummary(context, cartProvider),
-                const SizedBox(height: 16),
-                _buildCheckoutButton(context),
-              ],
-            ),
+          const SizedBox(width: 8),
         ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            if (cartProvider.items.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      Icon(Icons.shopping_cart_outlined, size: 64, color: Color(0xFFC73659)),
+                      SizedBox(height: 16),
+                      Text('Your cart is empty', style: TextStyle(color: Color(0xFFC73659))),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Column(
+                children: [
+                  ...cartProvider.items.map((item) => _buildCartItem(context, item, cartProvider)),
+                  const SizedBox(height: 24),
+                  _buildPaymentSummary(context, cartProvider),
+                  const SizedBox(height: 16),
+                  _buildCheckoutButton(context),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
